@@ -37,3 +37,7 @@ class MLP:
     def __call__(self, X):
         layer_outputs = [layer(X) for layer in self.layer_init]
         return layer_outputs[-1]
+
+
+
+# i miss vim :<
