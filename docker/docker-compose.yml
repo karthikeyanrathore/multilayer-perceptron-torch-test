@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  custom-mlp-model:
+    container_name: custom-mlp-model
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - custom-mlp-model-net 
+
+networks:
+  custom-mlp-model-net:

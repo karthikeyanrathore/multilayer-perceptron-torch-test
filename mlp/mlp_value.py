@@ -9,7 +9,7 @@ class Value:
         self.debug = None
 
     def __repr__(self):
-        return f"Value[data={self.data}]"
+        return f"Value(data={self.data}, gradient={self.gradient})"
 
     def __add__(self, value_to_add):
         if not isinstance(value_to_add, Value):
@@ -49,3 +49,51 @@ class Value:
             self.gradient +=  (1 - result.data**2) * result.gradient
         result.backward_propagation = _backward_propagation
         return result
+
+
+    def __pow__(self, other):
+        # other should not be Value object.
+        assert isinstance(other, (int, float)), "value can be either float/int."
+        result = Value(self.data**other, (self, ), f"pow{other}")
+        def _backward_propagation():
+            self.gradient += other * ((self.data)**(other - 1)) * result.gradient
+        result.backward_propagation = _backward_propagation
+        return result
+
+    def __truediv__(self, other):
+        result = self * other**-1
+        return result 
+
+    def exp(self):
+        import math
+        result = Value(math.exp(self.data), (self, ), "exp")
+        def _backward_propagation():
+            self.gradient = math.exp(self.data) * result.gradient
+        result.backward_propagation = _backward_propagation
+        return result
+
+    def __neg__(self):
+        return self * -1
+    
+    def __sub__(self, other):
+        return self + (-other)
+    
+    def __radd__(self, other):
+        # makes int + Value possible
+        return self + other
+
+    def backward(self):
+        visited_nodes = set()
+        final_sorted = []
+        def topological_sort_graph(vertex):
+            #  graph traversal in which each node v is visited only after all its dependencies are visited.
+            if vertex not in visited_nodes:
+                visited_nodes.add(vertex)
+                for previous_vertex in vertex.children:
+                    topological_sort_graph(previous_vertex)
+                # No dependencies left
+                final_sorted.append(vertex)
+        topological_sort_graph(self)
+        self.gradient = 1.0
+        for v in reversed(final_sorted):
+            v.backward_propagation()
