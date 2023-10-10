@@ -9,6 +9,7 @@ RUN pip3 install numpy
 
 COPY mlp /home/mlp-test/mlp
 
+# CMD ls mlp
 CMD python3 -u mlp/mlp_test.py
 
 
