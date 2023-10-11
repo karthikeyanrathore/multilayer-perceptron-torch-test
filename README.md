@@ -18,3 +18,5 @@ pwd test; coverage run -m pytest
 - add more test case related to MLP/Layers/Neuron model
 - add case for Value.exp.
 - add more activation functions to Value class.
+- explore pytorch doc: https://pytorch.org/docs/stable/torch.html
+- see if i can change tanh backward pass XD: https://discuss.pytorch.org/t/change-the-tanh-backward-code/148609/3
