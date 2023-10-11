@@ -86,17 +86,17 @@ class Value:
         return self + other
 
     def backward(self):
-        visited_nodes = set()
-        final_sorted = []
-        def topological_sort_graph(vertex):
-            #  graph traversal in which each node v is visited only after all its dependencies are visited.
-            if vertex not in visited_nodes:
-                visited_nodes.add(vertex)
-                for previous_vertex in vertex.children:
-                    topological_sort_graph(previous_vertex)
-                # No dependencies left
-                final_sorted.append(vertex)
-        topological_sort_graph(self)
         self.gradient = 1.0
-        for v in reversed(final_sorted):
+        for v in reversed(self.deepwalk()):
             v.backward_propagation()
+
+    def deepwalk(self):
+        # toposort
+        def _deepwalk(vertex, visited, nodes):
+            if vertex not in visited:
+                visited.add(vertex)
+                for previous_vertex in vertex.children:
+                    _deepwalk(previous_vertex, visited, nodes)
+                nodes.append(vertex)
+            return nodes
+        return _deepwalk(self, set(), [])
