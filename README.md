@@ -7,8 +7,8 @@ Testing custom MLP model written from scratch in python in < 200 loc against pyt
 docker-compose build; \
 docker-compose run custom-mlp-model
 ```
-## testing
-can't docker-compose as it required torch package.
+## testing in local
+can't docker-compose as it requires torch package.
 ```bash
 coverage run -m pytest
 ```
