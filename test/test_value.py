@@ -3,7 +3,7 @@ from mlp.mlp_value import Value
 import torch
 
 def test_value_operations():
-    # supports +, -, *, /
+    # supports +, -, *, /, **
     # float/int <op> Value works and reverse too.
     a = Value(-1.0)
     b = Value(3.0)
