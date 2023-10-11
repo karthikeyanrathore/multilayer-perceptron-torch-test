@@ -61,14 +61,17 @@ class Value:
         return result
 
     def __truediv__(self, other):
-        result = self * other**-1
-        return result 
+        return self * other**-1
+    
+    def __rtruediv__(self, other):
+        # makes (int/float)/Value possible
+        return other * self **-1
 
     def exp(self):
         import math
         result = Value(math.exp(self.data), (self, ), "exp")
         def _backward_propagation():
-            self.gradient = math.exp(self.data) * result.gradient
+            self.gradient += math.exp(self.data) * result.gradient
         result.backward_propagation = _backward_propagation
         return result
 
