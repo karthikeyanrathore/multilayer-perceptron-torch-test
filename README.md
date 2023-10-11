@@ -20,3 +20,4 @@ pwd test; coverage run -m pytest
 - add more activation functions to Value class.
 - explore pytorch doc: https://pytorch.org/docs/stable/torch.html
 - see if i can change tanh backward pass XD: https://discuss.pytorch.org/t/change-the-tanh-backward-code/148609/3
+- testing tinygrad ofc: https://github.com/tinygrad/tinygrad/tree/master
