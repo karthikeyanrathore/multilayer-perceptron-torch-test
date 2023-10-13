@@ -1,9 +1,10 @@
 
 from mlp.mlp_value import Value
-from mlp.mlp_model import Neuron
+from mlp.mlp_model import Neuron, MLP
 from mlp.mlp_test import mean_squared_error_loss
 import numpy as np
 import torch
+import os
 import random
 
 def test_value_operations():
@@ -90,7 +91,7 @@ def test_multiple_value_tensors():
 
     x = [Value(1.0), Value(10.0), Value(-9.0), Value(-2.0)]
     w = [(random.uniform(-1, 1)) for _ in range(4)]
-    print(w)
+    # print(w)
     b = 0
     # hack found :P
     f = sum((Value(wi) * xi for xi, wi in zip(x, w)), b)
@@ -112,7 +113,7 @@ def test_multiple_value_tensors():
     ftorch = sum((wi * xi for xi, wi in zip(x_torch, w)), b)
     ftorch.backward()
 
-    print(x)
+    # print(x)
 
     # forward good.
     assert f.data == ftorch.data.item()
@@ -136,14 +137,17 @@ def test_neuron_class_for_regression():
     final.backward()
 
 
+    # pytorch
     x_torch = torch.Tensor([[1.0], [10.0], [-9.0], [-2.0]]).double()
     x_torch.requires_grad = True
 
     res = neuron(x_torch)
+    assert isinstance(res, torch.Tensor) == True
     torch_tanh = res.tanh()
     torch_tanh.backward()
 
     # print(x_torch.grad)
+    # print(neuron.w[0].grad)
 
     # # forward good.
     assert final.data == torch_tanh.data.item()
@@ -155,3 +159,65 @@ def test_neuron_class_for_regression():
     assert abs(x_torch.grad[2][0].item() - x[2].gradient) < 1e-5
     assert abs(x_torch.grad[3][0].item() - x[3].gradient) < 1e-5
 
+    
+
+def test_regression_including_mseloss():
+
+    # 3 features
+    # 2 data pts. 
+
+    # Value
+    os.environ["PYTORCH"] = "0"
+    x = [
+        [1.0, 2.0, 3.0, 4.0],
+        [9.0, -1.0, 5.0, 6.0],
+    ]
+    # target out
+    y = [-1.0, 1.0]
+
+
+    # 3 features NN
+    nn = Neuron(len(x[0])) # working with w values between (-1,1)
+    # nn = MLP(3, [4, 4, 1])
+
+    epochs = 1
+    for epoch in range(epochs):
+        predic = [nn(pt) for pt in x]
+
+        # print(predic)
+        # MES loss
+        mse = sum((pi - yi)**2 for pi, yi in zip(predic, y)) / len(y)
+
+    
+        for p in nn.parameters():
+            p.gradient = 0.0
+
+
+        mse.backward()
+        
+        
+        print(f"value mse: {mse}")
+
+        # print(f"mse: {mse}")
+
+        # updating weights
+        for p in nn.parameters():
+            # print(p.data)
+            p.data = p.data - 0.001 * p.gradient
+
+
+    # pytorch implementation 
+    # w_for_torch = torch.tensor([w.data for w in nn.w], requires_grad=True).double()
+    # w_for_torch = [w.data for w in nn.w]
+    # b = torch.tensor(0.0, requires_grad=True).double()
+    # b = 0.0
+
+    os.environ["PYTORCH"] = "1"
+    w = torch.tensor(
+        [[0.068718719629973], [-0.815050457958294], [-0.7715021568114409], [-0.942495102903679]],
+        requires_grad=True).double()
+    b = torch.tensor([[0.0]], requires_grad=True).double()
+    x_torch = torch.Tensor([[1.0, 2.0, 3.0, 4.0], [9.0, -1.0, 5.0, 6.0]]).double()
+    x_torch.requires_grad = True
+
+   
