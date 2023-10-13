@@ -14,6 +14,8 @@ def calculate_loss(mlp, X, y, iter=10):
         loss = mean_squared_error_loss(y, y_prediction)
         print(f"[{i}] loss: {loss.data}")
 
+        # After each backward pass 
+        # update gradient to 0.0 for forward pass
         for p in mlp.parameters():
             p.gradient = 0.0
         # backward pass
@@ -24,7 +26,10 @@ def calculate_loss(mlp, X, y, iter=10):
             p.data =  p.data -  0.01 * p.gradient
 
 if __name__ == "__main__":
-    from mlp_model import MLP
+    try:
+        from mlp.mlp_model import MLP
+    except ModuleNotFoundError:
+        from mlp_model import MLP
 
     mlp = MLP(3, [4, 4, 1]) # model
 

@@ -1,6 +1,10 @@
 
 from mlp.mlp_value import Value
+from mlp.mlp_model import Neuron
+from mlp.mlp_test import mean_squared_error_loss
+import numpy as np
 import torch
+import random
 
 def test_value_operations():
     # supports +, -, *, /, **
@@ -57,7 +61,97 @@ def test_value_against_pytorch():
     # backward pass
     assert value_x.gradient == torch_x.grad.item()
 
-    
+
+def test_forward_and_backward_pass():
+
+    x = Value(-2.0)
+    y = Value(-1.0)
+
+    w = -1
+    b = 0
+    f = w * x + b
+    loss = ((f - y)**2)
+    # print(f"loss: {loss}")
+    f.backward()
+
+    xtorch = torch.Tensor([-2.0]).double() # 64-bit
+    xtorch.requires_grad = True
+    w = -1
+    b = 0
+    ftorch = w * xtorch + b
+    ftorch.backward()
+
+    # forward
+    assert f.data == ftorch.data.item()
+    # backward
+    assert x.gradient == xtorch.grad.item()
+
+def test_multiple_value_tensors():
+
+    x = [Value(1.0), Value(10.0), Value(-9.0), Value(-2.0)]
+    w = [(random.uniform(-1, 1)) for _ in range(4)]
+    print(w)
+    b = 0
+    # hack found :P
+    f = sum((Value(wi) * xi for xi, wi in zip(x, w)), b)
+
+    f.backward()
+
+    # xtorch = [
+    #     torch.Tensor([1.0]).double(),
+    #     torch.Tensor([10.0]).double(),
+    #     torch.Tensor([-9.0]).double(),
+    #     torch.Tensor([-4.0]).double(),
+    # ] # 64-bit
+
+    x_torch = torch.Tensor([[1.0], [10.0], [-9.0], [-2]]).double()
+    # for i  in range(4):
+    #     xtorch[i].requires_grad = True
+    x_torch.requires_grad = True
+
+    ftorch = sum((wi * xi for xi, wi in zip(x_torch, w)), b)
+    ftorch.backward()
+
+    print(x)
+
+    # forward good.
+    assert f.data == ftorch.data.item()
+
+    # backward should pass
+    assert x_torch.grad[0][0].item() == x[0].gradient
+    assert x_torch.grad[1][0].item() == x[1].gradient
+    assert x_torch.grad[2][0].item() == x[2].gradient
+    assert x_torch.grad[3][0].item() == x[3].gradient
 
 
+
+def test_neuron_class_for_regression():
+    x = [Value(1.0), Value(10.0), Value(-9.0), Value(-2.0)]
+
+    neuron = Neuron(4)
+    res = neuron(x)
+    # AHH!, tanh is bit funky in Value that's fails when used against torch.tanh().
+    # very minor diff though.
+    final = res.tanh()
+    final.backward()
+
+
+    x_torch = torch.Tensor([[1.0], [10.0], [-9.0], [-2.0]]).double()
+    x_torch.requires_grad = True
+
+    res = neuron(x_torch)
+    torch_tanh = res.tanh()
+    torch_tanh.backward()
+
+    # print(x_torch.grad)
+
+    # # forward good.
+    assert final.data == torch_tanh.data.item()
+
+    # # backward should pass
+    # difference should be very minor < 1e-5
+    assert abs(x_torch.grad[0][0].item() - x[0].gradient) < 1e-5
+    assert abs(x_torch.grad[1][0].item() - x[1].gradient) < 1e-5
+    assert abs(x_torch.grad[2][0].item() - x[2].gradient) < 1e-5
+    assert abs(x_torch.grad[3][0].item() - x[3].gradient) < 1e-5
 

@@ -10,7 +10,7 @@ docker-compose run custom-mlp-model
 ## testing in local
 can't docker-compose as it requires torch package.
 ```bash
-pwd test; coverage run -m pytest
+export TORCH_TESTING=1;pwd test; coverage run -m pytest
 ```
 
 ## TODO
