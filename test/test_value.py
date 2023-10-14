@@ -150,7 +150,7 @@ def test_neuron_class_for_regression():
     # print(neuron.w[0].grad)
 
     # # forward good.
-    assert final.data == torch_tanh.data.item()
+    assert abs(final.data - torch_tanh.data.item()) < 1e-5
 
     # # backward should pass
     # difference should be very minor < 1e-5
@@ -175,35 +175,32 @@ def test_regression_including_mseloss():
     # target out
     y = [-1.0, 1.0]
 
-
     # 3 features NN
     nn = Neuron(len(x[0])) # working with w values between (-1,1)
     # nn = MLP(3, [4, 4, 1])
 
-    epochs = 1
+    epochs = 100
     for epoch in range(epochs):
         predic = [nn(pt) for pt in x]
 
         # print(predic)
         # MES loss
-        mse = sum((pi - yi)**2 for pi, yi in zip(predic, y)) / len(y)
-
-    
+        mse = sum((pi - yi)**2 for pi, yi in zip(predic, y)) / len(y)    
         for p in nn.parameters():
             p.gradient = 0.0
 
-
         mse.backward()
         
-        
-        print(f"value mse: {mse}")
-
+        # print(f"value mse: {mse}")
         # print(f"mse: {mse}")
 
         # updating weights
         for p in nn.parameters():
             # print(p.data)
             p.data = p.data - 0.001 * p.gradient
+
+        if epoch == epochs -1:
+            val_res = mse
 
 
     # pytorch implementation 
@@ -213,11 +210,38 @@ def test_regression_including_mseloss():
     # b = 0.0
 
     os.environ["PYTORCH"] = "1"
-    w = torch.tensor(
-        [[0.068718719629973], [-0.815050457958294], [-0.7715021568114409], [-0.942495102903679]],
-        requires_grad=True).double()
-    b = torch.tensor([[0.0]], requires_grad=True).double()
+    
+    nn = Neuron(4)
     x_torch = torch.Tensor([[1.0, 2.0, 3.0, 4.0], [9.0, -1.0, 5.0, 6.0]]).double()
     x_torch.requires_grad = True
 
+    y = torch.tensor([-1.0, 1.0])
+
+    w_for_torch = nn.w
+    b = nn.b
    
+    epochs = 100
+    for epoch in range(epochs):
+        fw = x_torch @ w_for_torch.T + b 
+        
+        error = fw - y
+        mse = torch.sum(error**2 ) / error.numel()
+    
+        mse.backward()
+        
+        # print(f"torch mse: {mse}")
+        # print(w_for_torch.grad)
+        with torch.no_grad():
+            w_for_torch -= 0.001 * w_for_torch.grad 
+            b -= 0.001 * b.grad
+        
+        w_for_torch.grad.zero_()
+        b.grad.zero_()
+
+        if epoch == epochs - 1:
+            tr_res = mse
+    
+
+    print(f"tr_res.data.item(): {tr_res.data.item()}")
+    print(f"val.data: {val_res.data}")
+    assert abs(tr_res.data.item() - val_res.data) <  1e-4

@@ -15,9 +15,9 @@ class Neuron:
                 if int(os.environ.get("PYTORCH", 0)) == 1:
                     print("PYTORCH  enabled")
                     self.w = torch.tensor(
-                        [[0.068718719629973], [-0.815050457958294], [-0.7715021568114409], [-0.942495102903679]],
-                        requires_grad=True).double()
-                    self.b = torch.tensor([[0.0]], requires_grad=True)
+                        [0.068718719629973, -0.815050457958294, -0.7715021568114409, -0.942495102903679],
+                        requires_grad=True, dtype=torch.double)
+                    self.b = torch.tensor([0.0], dtype=torch.double, requires_grad=True)
                 else:
                     print("PYTORCH  disabled")
                     self.w = [
