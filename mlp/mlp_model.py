@@ -1,10 +1,14 @@
 import numpy as np
 import os
 import torch
+
 try:
     from mlp.mlp_value import Value
 except ModuleNotFoundError:
      from mlp_value import Value
+
+TEST_W = [0.068718719629973, -0.815050457958294, -0.7715021568114409, -0.942495102903679]
+TEST_B = 0.0
 
 class Neuron:
     def __init__(self, features_dim):
@@ -14,19 +18,13 @@ class Neuron:
             if features_dim == 4:
                 if int(os.environ.get("PYTORCH", 0)) == 1:
                     print("PYTORCH  enabled")
-                    self.w = torch.tensor(
-                        [0.068718719629973, -0.815050457958294, -0.7715021568114409, -0.942495102903679],
+                    self.w = torch.tensor(TEST_W,
                         requires_grad=True, dtype=torch.double)
-                    self.b = torch.tensor([0.0], dtype=torch.double, requires_grad=True)
+                    self.b = torch.tensor(TEST_B, dtype=torch.double, requires_grad=True)
                 else:
                     print("PYTORCH  disabled")
-                    self.w = [
-                        Value(0.068718719629973), 
-                        Value(-0.815050457958294), 
-                        Value(-0.7715021568114409), 
-                        Value(-0.942495102903679)
-                    ]
-                    self.b = Value(0.0)
+                    self.w = [Value(tw) for tw in TEST_W]
+                    self.b = Value(TEST_B)
             else:
                 # self.w = [Value(i * 0.5342) for i in range(features_dim)]
                 self.w = [Value(random.uniform(-1, 1)) for _ in range(features_dim)]
@@ -37,10 +35,6 @@ class Neuron:
 
     def __call__(self, X):
         # dot_result = np.dot(X, self.w) + self.b
-        # for wi,xi in zip(self.w, X):
-            # print(wi * xi)
-        
-        # print("FINISH")
         result = sum((wi*xi for wi,xi in zip(self.w, X)), self.b)
         # print(f"Neuron.result: {result.tanh()}")
         if int(os.environ.get("TORCH_TESTING", 0)):
