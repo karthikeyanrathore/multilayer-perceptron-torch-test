@@ -5,7 +5,6 @@ RUN apk --update  add \
     && pip3 install --upgrade pip 
 
 WORKDIR /home/mlp-test
-RUN pip3 install numpy
 
 COPY mlp /home/mlp-test/mlp
 

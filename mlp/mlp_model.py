@@ -1,6 +1,4 @@
-import numpy as np
 import os
-import torch
 
 try:
     from mlp.mlp_value import Value
@@ -14,6 +12,7 @@ class Neuron:
     def __init__(self, features_dim):
         import random
         if int(os.environ.get("TORCH_TESTING", 0)):
+            import torch
             print("TORCH_TESTING  enabled")
             if features_dim == 4:
                 if int(os.environ.get("PYTORCH", 0)) == 1:
@@ -34,7 +33,6 @@ class Neuron:
             self.b = Value(0)
 
     def __call__(self, X):
-        # dot_result = np.dot(X, self.w) + self.b
         result = sum((wi*xi for wi,xi in zip(self.w, X)), self.b)
         # print(f"Neuron.result: {result.tanh()}")
         if int(os.environ.get("TORCH_TESTING", 0)):
