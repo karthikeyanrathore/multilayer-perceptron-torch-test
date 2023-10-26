@@ -12,7 +12,7 @@ def calculate_loss(mlp, X, y, iter=10):
         # forward pass
         y_prediction =  [mlp(x) for x in X]
         loss = mean_squared_error_loss(y, y_prediction)
-        if i % 5 == 0:
+        if i % 10 == 0:
             print(f"[{i}] loss: {loss.data}")
 
         # After each backward pass 
@@ -42,4 +42,4 @@ if __name__ == "__main__":
     ] # 4 forward passes
     y = [1.0, -1.0, -1.0, 1.0] # desired targets
     
-    calculate_loss(mlp, X, y, iter=100)
+    calculate_loss(mlp, X, y, iter=500)
