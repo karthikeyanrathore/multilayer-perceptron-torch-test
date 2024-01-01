@@ -2,7 +2,7 @@
 
 Testing custom MLP model written from scratch in python in < 200 loc against pytorch library.
 
-## forward / backward pass comparison against pytorch
+## forward / backward propagation comparison against pytorch
 
 In mlp/mlp_value.py
 
