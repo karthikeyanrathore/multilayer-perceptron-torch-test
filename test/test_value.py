@@ -225,3 +225,4 @@ def test_regression_including_mseloss():
     print(f"tr_res.data.item(): {tr_res.data.item()}")
     print(f"val.data: {val_res.data}")
     assert abs(tr_res.data.item() - val_res.data) <  1e-4
+

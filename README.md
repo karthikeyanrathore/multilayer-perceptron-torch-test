@@ -2,6 +2,45 @@
 
 Testing custom MLP model written from scratch in python in < 200 loc against pytorch library.
 
+## forward / backward pass comparison against pytorch
+
+In mlp/mlp_value.py
+
+```python3
+>>> from mlp.mlp_value import Value
+>>> x = Value(-4.0)
+>>> z = 2 * x + 2 + x
+>>> q = z.tanh() + z * x
+>>> h = (z * z).tanh()
+>>> y = h + q + q * x
+>>> y.backward()
+>>> x.gradient
+104.99999992992078
+>>> y.data
+-116.00000001236691
+```
+
+In Pytorch
+
+```python3
+>>> import torch
+>>> x = torch.Tensor([-4.0]).double() # 64-bit
+>>> x.requires_grad = True
+>>> z = 2 * x + 2 + x
+>>> q = z.tanh() + z * x
+>>> h = (z * z).tanh()
+>>> y = h + q + q * x
+>>> y.backward()
+>>> x.gradient
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'Tensor' object has no attribute 'gradient'
+>>> x.grad.item()
+104.99999992992078
+>>> y.data
+tensor([-116.0000], dtype=torch.float64)
+```
+
 ## build and run mlp_test.py
 ```bash
 docker-compose build; \
