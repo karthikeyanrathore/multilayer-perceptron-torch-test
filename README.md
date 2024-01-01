@@ -31,10 +31,6 @@ In Pytorch
 >>> h = (z * z).tanh()
 >>> y = h + q + q * x
 >>> y.backward()
->>> x.gradient
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-AttributeError: 'Tensor' object has no attribute 'gradient'
 >>> x.grad.item()
 104.99999992992078
 >>> y.data
